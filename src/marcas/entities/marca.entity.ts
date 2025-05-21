@@ -7,6 +7,10 @@ export class Marca {
 
   @Column()
   nombre: string;
+  
+  @Column({ default: true })
+  habilitado: boolean;
+
 
   @OneToMany(() => Producto, (producto) => producto.marca)
   productos: Producto[];

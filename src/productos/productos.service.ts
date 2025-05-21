@@ -90,20 +90,44 @@ export class ProductosService {
   
     return await queryBuilder.getOne();  
   }
-  async findOnePorNombreoCodigo(param: string) {
-    const queryBuilder = this.productosRepository
-      .createQueryBuilder('p')
-      .leftJoinAndSelect('p.categoria', 'categoria')
-      .leftJoinAndSelect('p.marca', 'marca')
-      .leftJoinAndSelect('p.imagenes', 'imagenes');
+  // async findOnePorNombreoCodigo(param: string) {
+  //   const queryBuilder = this.productosRepository
+  //     .createQueryBuilder('p')
+  //     .leftJoinAndSelect('p.categoria', 'categoria')
+  //     .leftJoinAndSelect('p.marca', 'marca')
+  //     .leftJoinAndSelect('p.imagenes', 'imagenes');
   
-      queryBuilder 
-      .where('p.nombre = :param', { param })
-      .orWhere('p.codigo = :param', { param });
+  //     queryBuilder 
+  //     .where('p.nombre = :param', { param })
+  //     .orWhere('p.codigo = :param', { param });
     
   
-    return await queryBuilder.getOne();  
-  }
+  //   return await queryBuilder.getOne();  
+  // }
+  // async findOnePorNombreoCodigo(param: string) {
+  //   const queryBuilder = this.productosRepository
+  //     .createQueryBuilder('p')
+  //     .leftJoinAndSelect('p.categoria', 'categoria')
+  //     .leftJoinAndSelect('p.marca', 'marca')
+  //     .leftJoinAndSelect('p.imagenes', 'imagenes');
+
+  //   queryBuilder
+  //     .where('(p.nombre = :param OR p.codigo = :param)', { param })
+  //     .andWhere('p.habilitado = :habilitado', { habilitado: true });
+
+  //   return await queryBuilder.getOne();
+  // }
+  async findOnePorNombreoCodigo(param: string) {
+  return await this.productosRepository.findOne({
+    where: [
+      { nombre: param, habilitado: true },
+      { codigo: param, habilitado: true },
+    ],
+    relations: ['categoria', 'marca', 'imagenes'],
+  });
+}
+
+
   
 
   async findLast(length:number){

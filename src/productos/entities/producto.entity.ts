@@ -23,6 +23,9 @@ export class Producto {
   @Column('text')
   detalle: string;
 
+  @Column({ default: true })
+  habilitado: boolean;
+
   @ManyToOne(() => Marca, (marca) => marca.productos)
   @JoinColumn({ name: 'idmarca' })
   marca: Marca;

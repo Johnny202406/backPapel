@@ -25,6 +25,10 @@ export class MarcasService {
   findAll() {
     return this.marcaRepo.find();
   }
+  findAllHabilitado() {
+    return this.marcaRepo.find({ where: { habilitado: true } });
+  }
+
 
   findOne(id: number) {
     return `This action returns a #${id} marca`;
