@@ -26,7 +26,7 @@ import { Administrador } from './administradores/entities/administradore.entity'
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: process.env.MYSQL_ADDON_HOST,
-      port: 3306,
+      port:parseInt(process.env.MYSQL_ADDON_PORT||'3306', 10) || 3306,
       username: process.env.MYSQL_ADDON_USER,
       password: process.env.MYSQL_ADDON_PASSWORD,
       database: process.env.MYSQL_ADDON_DB,
