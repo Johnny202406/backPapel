@@ -4,6 +4,7 @@ import { CreateMarcaDto } from './dto/create-marca.dto';
 import { UpdateMarcaDto } from './dto/update-marca.dto';
 import { MarcaDto } from './dto/payload-marca.dto';
 import { GetMarcasDto } from './dto/get-marca.dto';
+import { HabilitarDeshabilitar } from 'src/productos/dto/habilitarDeshabilitar.dto';
 
 @Controller('marcas')
 export class MarcasController {
@@ -46,5 +47,10 @@ export class MarcasController {
    @Get("tabla")
    async findTabla(@Query() query: GetMarcasDto){
     return this.marcasService.findTabla(query)
+   }
+
+   @Put('habilitarDeshabilitar')
+   async habilitarDeshabilitar( @Body() query:HabilitarDeshabilitar){
+     return this.marcasService.habilitarDeshabilitar(query)
    }
 }

@@ -17,17 +17,20 @@ import { EstadoPedidosModule } from './estado_pedidos/estado_pedidos.module';
 import { Pedido } from './pedidos/entities/pedido.entity';
 import { DetallesPedido } from './detalles_pedidos/entities/detalles_pedido.entity';
 import { EstadoPedido } from './estado_pedidos/entities/estado_pedido.entity';
+import { AuthModule } from './auth/auth.module';
+import { AdministradoresModule } from './administradores/administradores.module';
+import { Administrador } from './administradores/entities/administradore.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
+      host: process.env.MYSQL_ADDON_HOST,
       port: 3306,
-      username: 'root',
-      password: '',
-      database: 'papeleria',
-      entities: [Categoria,Marca,Producto,Imagene,Pedido,DetallesPedido,EstadoPedido],
+      username: process.env.MYSQL_ADDON_USER,
+      password: process.env.MYSQL_ADDON_PASSWORD,
+      database: process.env.MYSQL_ADDON_DB,
+      entities: [Categoria,Marca,Producto,Imagene,Pedido,DetallesPedido,EstadoPedido,Administrador],
       synchronize: false, // solo para desarrollo
     }),
     CategoriasModule,
@@ -37,8 +40,11 @@ import { EstadoPedido } from './estado_pedidos/entities/estado_pedido.entity';
     PedidosModule,
     DetallesPedidosModule,
     EstadoPedidosModule,
+    AuthModule,
+    AdministradoresModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
+

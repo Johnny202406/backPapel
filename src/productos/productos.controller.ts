@@ -5,6 +5,7 @@ import { UpdateProductoDto } from './dto/update-producto.dto';
 import { GetProductosDto } from './dto/get-productos.dto'
 import { GetProductosDtoCliente } from './dto/get-productos-cliente.dto';
 import { ProductoDto } from './dto/payload-producto.dto';
+import { HabilitarDeshabilitar } from './dto/habilitarDeshabilitar.dto';
 
 @Controller('productos')
 export class ProductosController {
@@ -19,7 +20,7 @@ export class ProductosController {
 
   async getProductos(@Query() query: GetProductosDto) {
     // `query` contendrá los parámetros de búsqueda, paginación, etc.
-    const { search, page, pageSize, categoryId, brandId } = query;
+    const { search, page, pageSize, categoryId, brandId,estado } = query;
 
     // Llamada al servicio para obtener los productos basados en los filtros
     const productos = await this.productosService.getProductos(
@@ -27,7 +28,8 @@ export class ProductosController {
       pageSize,
       search,
       categoryId,
-      brandId
+      brandId,
+      estado
     );
 
     return productos;
@@ -101,8 +103,11 @@ async crearProducto(@Body() query:ProductoDto){
 @Put('edit/:id')
 async editarProducto(@Param('id') id: number,@Body() query:ProductoDto){
   return this.productosService.editarProducto(id,query)
-
 }
 
+@Put('habilitarDeshabilitar')
+async habilitarDeshabilitar( @Body() query:HabilitarDeshabilitar){
+  return this.productosService.habilitarDeshabilitar(query)
+}
   
 }

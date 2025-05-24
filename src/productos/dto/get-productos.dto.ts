@@ -1,4 +1,5 @@
-import { IsOptional, IsString, IsInt, Min } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, IsInt, Min, IsBoolean } from 'class-validator';
 
 export class GetProductosDto {
   // Filtro de búsqueda por nombre
@@ -27,4 +28,9 @@ export class GetProductosDto {
   @IsOptional()
   @IsInt() // Asegura que sea un número entero
   brandId?: number; // Este campo es opcional
+
+  // Filtro de estado
+  @IsOptional()
+  @IsString() // Asegura que sea un booleano 
+  estado?: string; // Este campo es opcional
 }

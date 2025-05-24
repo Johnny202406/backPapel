@@ -12,4 +12,8 @@ export class GetCategoriasDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  estado?: string|boolean;
 }

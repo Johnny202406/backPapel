@@ -6,6 +6,7 @@ import { UpdateCategoriaDto } from './dto/update-categoria.dto';
 import { Categoria } from './entities/categoria.entity';
 import { CategoriaDto } from './dto/payload-categoria.dto';
 import { GetCategoriasDto } from './dto/get-categoria.dto';
+import { HabilitarDeshabilitar } from 'src/productos/dto/habilitarDeshabilitar.dto';
 
 @Controller('categorias')
 export class CategoriasController {
@@ -48,5 +49,10 @@ export class CategoriasController {
   @Get("tabla")
   async findTabla(@Query() query: GetCategoriasDto){
   return this.categoriasService.findTabla(query)
+  }
+
+  @Put('habilitarDeshabilitar')
+     async habilitarDeshabilitar( @Body() query:HabilitarDeshabilitar){
+       return this.categoriasService.habilitarDeshabilitar(query)
   }
 }

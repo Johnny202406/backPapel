@@ -6,6 +6,7 @@ import { Like, Repository } from 'typeorm';
 import { Categoria } from './entities/categoria.entity';
 import { CategoriaDto } from './dto/payload-categoria.dto';
 import { GetCategoriasDto } from './dto/get-categoria.dto';
+import { HabilitarDeshabilitar } from 'src/productos/dto/habilitarDeshabilitar.dto';
 
 @Injectable()
 export class CategoriasService {
@@ -70,12 +71,26 @@ export class CategoriasService {
   }
   
   async findTabla(query: GetCategoriasDto) {
-    const { page = 1, pageSize = 5, search } = query;
+    let { page = 1, pageSize = 5, search ,estado} = query;
 
     const where: any = {};
   
     if (search) {
       where.nombre = Like(`%${search}%`);
+    }
+    if (estado) {
+      
+      switch (estado) {
+        case "true":
+          estado=true
+          break;
+        case "false":
+          estado=false
+          break;
+        default:
+          break;
+      }
+      where.habilitado = estado;
     }
   
     const [categorias, totalRecords] = await this.categoriaRepo.findAndCount({
@@ -91,5 +106,18 @@ export class CategoriasService {
       categorias,
       totalRecords,
     };
+  }
+
+  async habilitarDeshabilitar(query:HabilitarDeshabilitar){
+    const { id, habilitado } = query;
+
+    const categoria = await this.categoriaRepo.findOne({ where: { id } });
+
+    if (!categoria) {
+      throw new NotFoundException(`Categoria con ID ${id} no encontrado`);
+    }
+
+    categoria.habilitado = habilitado;
+    return await this.categoriaRepo.save(categoria);
   }
 }

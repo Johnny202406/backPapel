@@ -1,4 +1,4 @@
-import { ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateProductoDto } from './dto/create-producto.dto';
 import { UpdateProductoDto } from './dto/update-producto.dto';
 
@@ -9,6 +9,7 @@ import { Categoria } from 'src/categorias/entities/categoria.entity';
 import { Marca } from 'src/marcas/entities/marca.entity';
 import { Imagene } from 'src/imagenes/entities/imagene.entity';
 import { ProductoDto } from './dto/payload-producto.dto';
+import { HabilitarDeshabilitar } from './dto/habilitarDeshabilitar.dto';
 
 @Injectable()
 export class ProductosService {
@@ -30,8 +31,11 @@ export class ProductosService {
     pageSize: number = 5,
     search: string,
     categoryId?: number,
-    brandId?: number
+    brandId?: number,
+    estado?:string|boolean,
   ) {
+
+    
     const queryBuilder = this.productosRepository.createQueryBuilder('p');
   
     if (search && search.trim() !== '') {
@@ -48,6 +52,20 @@ export class ProductosService {
   
     if (brandId !== undefined && brandId !== null) {
       queryBuilder.andWhere('p.marca = :brandId', { brandId });
+    }
+
+    if (estado !== undefined && estado !== null) {
+      switch (estado) {
+        case "true":
+          estado=true
+          break;
+        case "false":
+          estado=false
+          break;
+        default:
+          break;
+      }
+      queryBuilder.andWhere('p.habilitado = :estado', { estado });
     }
   
     // ✅ CLONA el QueryBuilder para contar
@@ -170,6 +188,7 @@ export class ProductosService {
     .leftJoinAndSelect('p.categoria', 'categoria')
     .leftJoinAndSelect('p.marca', 'marca')
     .leftJoinAndSelect('p.imagenes', 'imagenes')
+    .where('p.habilitado = :habilitado', { habilitado: true })
     .orderBy('p.id', 'DESC');
 
   let baseProductos: Producto[] = [];
@@ -274,26 +293,43 @@ export class ProductosService {
       .sort((a, b) => b.cantidad - a.cantidad);
   }
 
-  async crearProducto(dto:ProductoDto){
-    const producto:Producto = this.productosRepository.create(<Producto>{
-      codigo: dto.codigo.toUpperCase(),
-      nombre: dto.nombre.toUpperCase(),
-      precio: dto.precio,
-      stock: Math.trunc(<number>dto.stock) ?? 0,
-      detalle: dto.detalle?.toUpperCase() ?? '',
-      marca: dto.marcaId ? { id: dto.marcaId } : null,
-      categoria: dto.categoriaId ? { id: dto.categoriaId } : null,
-    });
-
-    try {
-      return await this.productosRepository.save(producto);
-    } catch (error) {
-      if (error.code === 'ER_DUP_ENTRY') {
-        throw new ConflictException('El código o nombre ya existe');
-      }
-      throw new InternalServerErrorException('Error al crear producto');
+ async crearProducto(dto: ProductoDto) {
+  // Verificar que la marca exista y esté habilitada
+  if (dto.marcaId) {
+    const marca = await this.marcaRepository.findOne({ where: { id: dto.marcaId, habilitado: true } });
+    if (!marca) {
+      throw new BadRequestException('La marca está deshabilitada o no existe');
     }
   }
+
+  // Verificar que la categoría exista y esté habilitada
+  if (dto.categoriaId) {
+    const categoria = await this.categoriaRepository.findOne({ where: { id: dto.categoriaId, habilitado: true } });
+    if (!categoria) {
+      throw new BadRequestException('La categoría está deshabilitada o no existe');
+    }
+  }
+
+  const producto: Producto = this.productosRepository.create(<Producto>{
+    codigo: dto.codigo.toUpperCase(),
+    nombre: dto.nombre.toUpperCase(),
+    precio: dto.precio,
+    stock: Math.trunc(<number>dto.stock) ?? 0,
+    detalle: dto.detalle?.toUpperCase() ?? '',
+    marca: dto.marcaId ? { id: dto.marcaId } : null,
+    categoria: dto.categoriaId ? { id: dto.categoriaId } : null,
+  });
+
+  try {
+    return await this.productosRepository.save(producto);
+  } catch (error) {
+    if (error.code === 'ER_DUP_ENTRY') {
+      throw new ConflictException('El código o nombre ya existe');
+    }
+    throw new InternalServerErrorException('Error al crear producto');
+  }
+}
+
   async editarProducto(id:number,dto:ProductoDto){
     const producto = await this.productosRepository.findOne({ where: { id } });
     if (!producto) throw new NotFoundException('Producto no encontrado');
@@ -320,8 +356,18 @@ export class ProductosService {
   }
   
   
-  
-  
+  async habilitarDeshabilitar(query:HabilitarDeshabilitar){
+    const { id, habilitado } = query;
+
+    const producto = await this.productosRepository.findOne({ where: { id } });
+
+    if (!producto) {
+      throw new NotFoundException(`Producto con ID ${id} no encontrado`);
+    }
+
+    producto.habilitado = habilitado;
+    return await this.productosRepository.save(producto);
+  }
   
   
   

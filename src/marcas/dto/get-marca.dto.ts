@@ -12,4 +12,8 @@ export class GetMarcasDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  estado?: string|boolean;
 }

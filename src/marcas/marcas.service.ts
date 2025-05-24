@@ -8,6 +8,7 @@ import { Like, Repository } from 'typeorm';
 import { Marca } from './entities/marca.entity';
 import { MarcaDto } from './dto/payload-marca.dto';
 import { GetMarcasDto } from './dto/get-marca.dto';
+import { HabilitarDeshabilitar } from 'src/productos/dto/habilitarDeshabilitar.dto';
 
 
 @Injectable()
@@ -76,13 +77,26 @@ export class MarcasService {
     }
 
     async findTabla(query: GetMarcasDto) {
-      const { page = 1, pageSize = 5, search } = query;
+      let { page = 1, pageSize = 5, search,estado } = query;
  
       const where: any = {};
     
       if (search) {
         where.nombre = Like(`%${search}%`);
       }
+      if (estado) {
+      switch (estado) {
+        case "true":
+          estado=true
+          break;
+        case "false":
+          estado=false
+          break;
+        default:
+          break;
+      }
+      where.habilitado = estado;
+    }
     
       const [marcas, totalRecords] = await this.marcaRepo.findAndCount({
         where, 
@@ -98,4 +112,17 @@ export class MarcasService {
         totalRecords,
       };
     }
+
+     async habilitarDeshabilitar(query:HabilitarDeshabilitar){
+        const { id, habilitado } = query;
+    
+        const marca = await this.marcaRepo.findOne({ where: { id } });
+    
+        if (!marca) {
+          throw new NotFoundException(`Marca con ID ${id} no encontrado`);
+        }
+    
+        marca.habilitado = habilitado;
+        return await this.marcaRepo.save(marca);
+      }
 }
